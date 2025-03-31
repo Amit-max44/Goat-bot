@@ -18,19 +18,19 @@ module.exports = {
 	onStart: async function ({ api, event }) {
 		try {
 			const ownerInfo = {
-				name: ' Amit max',
-				class: 'Inter 1st ',
-				group: 'Accounting ',
-				gender: 'Male',
+				name: ' ᴀᴍɪᴛ ᴍᴀx',
+				class: 'ɪɴᴛᴇʀ 1ꜱᴛ ',
+				group: 'ᴀᴄᴄᴏᴜɴᴛɪɴɢ ',
+				gender: 'ᴍᴀʟᴇ',
 				Birthday: '18-05-2008',
-				religion: 'Hindu',
-				hobby: 'Flirting 🤓',
+				religion: 'ʜɪɴᴅᴜ',
+				hobby: 'ꜰʟɪʀᴛɪɴɢ 🤓',
 				Fb: ' https://www.facebook.com/share/1APBTw6Gbc/',
-				Relationship: 'Singel ',
+				Relationship: 'ꜱɪɴɢᴇʟ ',
 				Height: '5"6'
 			};
 
-			const bold = 'https://i.imgur.com/7Q68Fe9.mp4';
+			const bold = 'https://i.imgur.com/J77jvNK.mp4';
 			const tmpFolderPath = path.join(__dirname, 'tmp');
 
 			if (!fs.existsSync(tmpFolderPath)) {
@@ -44,16 +44,16 @@ module.exports = {
 
 			const response = `
 𓀬 𝐎𝐖𝐍𝐄𝐑 𝐈𝐍𝐅𝐎 𓀬 \n
- ~NAME: ${ownerInfo.name}
- ~CLASS: ${ownerInfo.class}
- ~GROUP: ${ownerInfo.group}
- ~GENDER: ${ownerInfo.gender}
- ~BIRTHDAY: ${ownerInfo.Birthday}
- ~RELIGION: ${ownerInfo.religion}
- ~RELATIONSHIP: ${ownerInfo.Relationship}
- ~HOBBY: ${ownerInfo.hobby}
- ~HEIGHT: ${ownerInfo.Height}
- ~FN: ${ownerInfo.Fb}
+ ~ɴᴀᴍᴇ: ${ownerInfo.name}
+ ~ᴄʟᴀꜱꜱ: ${ownerInfo.class}
+ ~ɢʀᴏᴜᴘ: ${ownerInfo.group}
+ ~ɢᴇɴᴅᴇʀ: ${ownerInfo.gender}
+ ~ʙɪʀᴛʜᴅᴀʏ: ${ownerInfo.Birthday}
+ ~ʀᴇʟɪɢɪᴏɴ: ${ownerInfo.religion}
+ ~ʀᴇʟᴀᴛɪᴏɴꜱʜɪᴘ: ${ownerInfo.Relationship}
+ ~ʜᴏʙʙʏ: ${ownerInfo.hobby}
+ ~ʜᴇɪɢʜᴛ: ${ownerInfo.Height}
+ ~ꜰʙ: ${ownerInfo.Fb}
 			`;
 
 			await api.sendMessage({
