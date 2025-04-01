@@ -20,7 +20,7 @@ module.exports = {
     const senderID = event.senderID;
 
     const loadingMessage = await message.reply({
-      body: "let me entertain you wait...🤡",
+      body: "𝗹𝘂𝗰𝗰𝗵𝗮𝗺𝗶 𝗰𝗵𝗲𝗿𝗲 𝗱𝗲...😒 🫦",
     });
 
     const driveLinks = [
