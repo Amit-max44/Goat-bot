@@ -1,93 +1,124 @@
+let fontEnabled = true;
+
+function formatFont(text) {
+	const fontMapping = {
+		a: "𝐚", b: "𝐛", c: "𝐜", d: "𝐝", e: "𝐞", f: "𝐟", g: "𝐠", h: "𝐡", i: "𝐢", j: "𝐣", k: "𝐤", l: "𝐥", m: "𝐦",
+		n: "𝐧", o: "𝐨", p: "𝐩", q: "𝐪", r: "𝐫", s: "𝐬", t: "𝐭", u: "𝐮", v: "𝐯", w: "𝐰", x: "𝐱", y: "𝐲", z: "𝐳",
+		A: "𝐀", B: "𝐁", C: "𝐂", D: "𝐃", E: "𝐄", F: "𝐅", G: "𝐆", H: "𝐇", I: "𝐈", J: "𝐉", K: "𝐊", L: "𝐋", M: "𝐌",
+		N: "𝐍", O: "𝐎", P: "𝐏", Q: "𝐐", R: "𝐑", S: "𝐒", T: "𝐓", U: "𝐔", V: "𝐕", W: "𝐖", X: "𝐗", Y: "𝐘", Z: "𝐙"
+	};
+
+	let formattedText = "";
+	for (const char of text) {
+		if (fontEnabled && char in fontMapping) {
+			formattedText += fontMapping[char];
+		} else {
+			formattedText += char;
+		}
+	}
+
+	return formattedText;
+}
+
 const os = require('os');
-const util = require('util');
-const exec = util.promisify(require('child_process').exec);
+const fs = require('fs').promises;
+const pidusage = require('pidusage');
+
+async function getStartTimestamp() {
+	try {
+		const startTimeStr = await fs.readFile('time.txt', 'utf8');
+		return parseInt(startTimeStr);
+	} catch (error) {
+		return Date.now();
+	}
+}
+
+async function saveStartTimestamp(timestamp) {
+	try {
+		await fs.writeFile('time.txt', timestamp.toString());
+	} catch (error) {
+		console.error('Error saving start timestamp:', error);
+	}
+}
+
+function byte2mb(bytes) {
+	const units = ['Bytes', 'KB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB'];
+	let l = 0, n = parseInt(bytes, 10) || 0;
+	while (n >= 1024 && ++l) n = n / 1024;
+	return `${n.toFixed(n < 10 && l > 0 ? 1 : 0)} ${units[l]}`;
+}
+
+function getUptime(uptime) {
+	const days = Math.floor(uptime / (3600 * 24));
+	const hours = Math.floor((uptime % (3600 * 24)) / 3600);
+	const mins = Math.floor((uptime % 3600) / 60);
+	const seconds = Math.floor(uptime % 60);
+	const months = Math.floor(days / 30);
+	const remainingDays = days % 30;
+
+	return `Uptime: ${months} month(s), ${remainingDays} day(s), ${hours} hour(s), ${mins} minute(s), and ${seconds} second(s)`;
+}
+
+function getDiskSpace() {
+	const disk = os.freemem(); // Available disk space (RAM)
+	const totalDisk = os.totalmem(); // Total disk space (RAM)
+	return {
+		free: byte2mb(disk),
+		total: byte2mb(totalDisk)
+	};
+}
+
+async function onStart({ api, event }) {
+	const startTime = await getStartTimestamp();
+	const uptimeSeconds = Math.floor((Date.now() - startTime) / 1000);
+
+	const usage = await pidusage(process.pid);
+	const osInfo = {
+		platform: os.platform(),
+		architecture: os.arch()
+	};
+
+	const timeStart = Date.now();
+	const uptimeMessage = getUptime(uptimeSeconds);
+	const uid = "100088513497761";
+	const diskSpace = getDiskSpace();
+
+	const returnResult = `
+BOT has been working for ${uptimeMessage}
+❖ CPU Usage: ${usage.cpu.toFixed(1)}%
+❖ RAM Usage: ${byte2mb(usage.memory)}
+❖ Cores: ${os.cpus().length}
+❖ Ping: ${Date.now() - timeStart}ms
+❖ OS Platform: ${osInfo.platform}
+❖ System Architecture: ${osInfo.architecture}
+❖ Free Disk Space: ${diskSpace.free}
+❖ Total Disk Space: ${diskSpace.total}`;
+
+	await saveStartTimestamp(startTime);
+	return api.shareContact(formatFont(returnResult), uid, event.threadID);
+}
 
 module.exports = {
-  config: {
-    name: "uptime",
-    aliases: ["upt"],
-    version: "1.0",
-    author: "JARiF@Cock",
-    role: 0,
-    category: "𝗦𝗬𝗦𝗧𝗘𝗠",
-    guide: {
-      en: "Use {pn}info"
-    }
-  },
-  onStart: async function ({ message }) {
-
-    const uptime = process.uptime();
-    const formattedUptime = formatMilliseconds(uptime * 1000);
-
-    const totalMemory = os.totalmem();
-    const freeMemory = os.freemem();
-    const usedMemory = totalMemory - freeMemory;
-
-    const diskUsage = await getDiskUsage();
-
-    const systemInfo = {
-      os: `${os.type()} ${os.release()}`,
-      arch: os.arch(),
-      cpu: `${os.cpus()[0].model} (${os.cpus().length} cores)`,
-      loadAvg: os.loadavg()[0], // 1-minute load average
-      botUptime: formattedUptime,
-      systemUptime: formatUptime(os.uptime()),
-      processMemory: prettyBytes(process.memoryUsage().rss)
-    };
-
-    const response = `𝐒𝐭𝐚𝐭𝐮𝐬\n`
-      + '----------------------\n'
-      + '⚙  𝐒𝐲𝐬𝐭𝐞𝐦 𝐈𝐧𝐟𝐨𝐫𝐦𝐚𝐭𝐢𝐨𝐧 Amit Max bot:\n'
-      + `  𝐎𝐒: ${systemInfo.os}\n`
-      + `  𝐀𝐫𝐜𝐡: ${systemInfo.arch}\n`
-      + `  𝐂𝐏𝐔: ${systemInfo.cpu}\n`
-      + `  𝐋𝐨𝐚𝐝 𝐀𝐯𝐠: ${systemInfo.loadAvg}%\n`
-      + '----------------------\n'
-      + `💾 𝐌𝐞𝐦𝐨𝐫𝐲 𝐈𝐧𝐟𝐨𝐫𝐦𝐚𝐭𝐢𝐨𝐧:\n`
-      + `  𝐌𝐞𝐦𝐨𝐫𝐲 𝐔𝐬𝐚𝐠𝐞: ${prettyBytes(usedMemory)} / Total ${prettyBytes(totalMemory)}\n`
-      + `  𝐑𝐀𝐌 𝐔𝐬𝐚𝐠𝐞: ${prettyBytes(os.totalmem() - os.freemem())} / Total ${prettyBytes(totalMemory)}\n`
-      + '----------------------\n'
-      + `📀 𝐃𝐢𝐬𝐤 𝐒𝐩𝐚𝐜𝐞 𝐈𝐧𝐟𝐨𝐫𝐦𝐚𝐭𝐢𝐨𝐧:\n`
-      + `  𝐃𝐢𝐬𝐤 𝐒𝐩𝐚𝐜𝐞 𝐔𝐬𝐚𝐠𝐞: ${prettyBytes(diskUsage.used)} / Total ${prettyBytes(diskUsage.total)}\n`
-      + '----------------------\n'
-      + `🤖 𝐁𝐨𝐭 𝐔𝐩𝐭𝐢𝐦𝐞: ${systemInfo.botUptime}\n`
-      + `⚙ 𝐒𝐞𝐫𝐯𝐞𝐫 𝐔𝐩𝐭𝐢𝐦𝐞: ${systemInfo.systemUptime}\n`
-      + `📊 𝐏𝐫𝐨𝐜𝐞𝐬𝐬 𝐌𝐞𝐦𝐨𝐫𝐲 𝐔𝐬𝐚𝐠𝐞: ${systemInfo.processMemory}\n`
-      + '----------------------';
-
-    message.reply(response);
-  }
+	config: {
+		name: 'uptime',
+    aliases:["upt"],
+		version: '2.2.0',
+		author: "Xrotick", // Do not change credits
+		countDown: 5,
+		role: 0,
+		shortDescription: 'Shows uptime and system details',
+		longDescription: {
+			en: ''
+		},
+		category: 'tools',
+		guide: {
+			en: '{p}uptime'
+		}
+	},
+	byte2mb,
+	getStartTimestamp,
+	saveStartTimestamp,
+	getUptime,
+	getDiskSpace,
+	onStart
 };
-
-async function getDiskUsage() {
-  const { stdout } = await exec('df -k /');
-  const [_, total, used] = stdout.split('\n')[1].split(/\s+/).filter(Boolean);
-  return { total: parseInt(total) * 1024, used: parseInt(used) * 1024 };
-}
-
-function formatUptime(seconds) {
-  const days = Math.floor(seconds / 86400);
-  const hours = Math.floor((seconds % 86400) / 3600);
-  const minutes = Math.floor((seconds % 3600) / 60);
-  const secondsRemaining = seconds % 60;
-
-  return `${days}d ${hours}h ${minutes}m ${secondsRemaining}s`;
-}
-
-function formatMilliseconds(ms) {
-  const seconds = Math.floor(ms / 1000);
-  const minutes = Math.floor(seconds / 60);
-  const hours = Math.floor(minutes / 60);
-
-  return `${hours}h ${minutes % 60}m ${seconds % 60}s`;
-}
-
-function prettyBytes(bytes) {
-  const units = ['B', 'KB', 'MB', 'GB', 'TB'];
-  let i = 0;
-  while (bytes >= 1024 && i < units.length - 1) {
-    bytes /= 1024;
-    i++;
-  }
-  return `${bytes.toFixed(2)} ${units[i]}`;
-    }
