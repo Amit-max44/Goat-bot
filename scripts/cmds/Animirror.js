@@ -3,7 +3,7 @@ const { getStreamFromURL } = global.utils;
 
 
 const models = {
-  "1": "Anime Premium",
+  "1": "Anime Premium V2",
   "2": "Cartoon Premium",
   "3": "Anime Style: Maid Outfit",
   "4": "Anime Style: Beach Babe",
@@ -24,12 +24,18 @@ const models = {
   "19": "Anime Art: Alchemical Adventures (Fullmetal Alchemist)",
   "20": "Anime Art: Heroic Future (My Hero Academia)",
   "21": "Anime Art: Prehistoric Quest (Dr Stone)",
-  "22": "Anime Art: Court Clash (Haikyuu)"
+  "22": "Anime Art: Court Clash (Haikyuu)",
+  "23": "Anime Style: Ghibli V1",
+  "24": "Anime Style: Ghibli V2",
+  "25": "Anime Style: Webtoon",
+  
+  
+  
 };
 
 module.exports = {
   config: {
-    name: "aniart",
+    name: "Animirror",
     version: "1.0",
     author: "SiAM",// Don't change 
     countDown: 15,
