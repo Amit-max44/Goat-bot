@@ -1,78 +1,97 @@
-const axios = require("axios");
-const fs = require("fs");
-const path = require("path");
+const axios = require('axios');
+const yts = require("yt-search");
 
-const API_URL = "https://raw.githubusercontent.com/nazrul4x/Noobs/main/Apis.json";
-
-const fetchApis = async () => {
-  const { data } = await axios.get(API_URL);
-  return { searchApi: data.api, downloadApi: data.api };
+const baseApiUrl = async () => {
+    const base = await axios.get(
+        `https://raw.githubusercontent.com/Mostakim0978/D1PT0/refs/heads/main/baseApiUrl.json`
+    );
+    return base.data.api;
 };
 
-module.exports.config = {
-  name: "song",
-  aliases: ["songs", "musics"],
-  version: "1.6.9",
-  author: "Nazrul",
-  role: 0,
-  countDown: 9,
-  category: "media",
-  guide: { en: "{pn} [song name] or reply with a link" }
-};
+(async () => {
+    global.apis = {
+        diptoApi: await baseApiUrl()
+    };
+})();
 
-module.exports.onStart = async ({ api, event, args }) => {
-  const { threadID, messageID, messageReply } = event;
-  let query = args.join(" ");
-  let ytUrl = "";
-  let id = "";
-
-  const ytMatch = messageReply?.body?.match(/https?:\/\/(www\.)?(youtube\.com|youtu\.be)\/\S+/gi) || 
-                  query.match(/https?:\/\/(www\.)?(youtube\.com|youtu\.be)\/\S+/gi);
-
-  if (ytMatch) {
-    ytUrl = ytMatch[0];
-    const ytIdMatch = ytUrl.match(/(?:v=|\/)([0-9A-Za-z_-]{11})/);
-    if (ytIdMatch) id = ytIdMatch[1];
-  } 
-
-  if (!ytUrl && !query) {
-    return api.sendMessage("❌ Provide a song name or YouTube link.", threadID, messageID);
-  }
-
-  api.setMessageReaction("🦆", messageID, () => {}, true);
-
-  try {
-    const { searchApi, downloadApi } = await fetchApis();
-
-    if (!id) {
-      const res = await axios.get(`${searchApi}/nazrul/ytSearchx?name=${encodeURIComponent(query)}`);
-      if (!res.data.result?.length) throw new Error("No results found.");
-
-      const randomIndex = Math.floor(Math.random() * Math.min(3, res.data.result.length));
-      id = res.data.result[randomIndex].id;
+async function getStreamFromURL(url, pathName) {
+    try {
+        const response = await axios.get(url, {
+            responseType: "stream"
+        });
+        response.data.path = pathName;
+        return response.data;
+    } catch (err) {
+        throw err;
     }
+}
 
-    const { data: mp3Data } = await axios.get(`${downloadApi}/nazrul/ytMp3xx?id=${id}`);
-    if (!mp3Data?.url) throw new Error("Download link not found!");
+global.utils = {
+    ...global.utils,
+    getStreamFromURL: global.utils.getStreamFromURL || getStreamFromURL
+};
 
-    const filePath = path.join(__dirname, "song.mp3");
-    const writer = fs.createWriteStream(filePath);
+function getVideoID(url) {
+    const checkurl = /^(?:https?:\/\/)?(?:m\.|www\.)?(?:youtu\.be\/|youtube\.com\/(?:embed\/|v\/|watch\?v=|watch\?.+&v=|shorts\/))((\w|-){11})(?:\S+)?$/;
+    const match = url.match(checkurl);
+    return match ? match[1] : null;
+}
 
-    (await axios.get(mp3Data.url, { responseType: "stream" })).data.pipe(writer);
+const config = {
+    name: "song",
+    author: "Mesbah Saxx",
+    credits: "Mesbah Saxx",
+    version: "1.2.0",
+    role: 0,
+    hasPermssion: 0,
+    description: "",
+    usePrefix: true,
+    prfix: true,
+    category: "media",
+    commandCategory: "media",
+    cooldowns: 5,
+    countDown: 5,
+};
 
-    writer.on("finish", () => {
-      api.sendMessage({ body: `🎶 Title: ${mp3Data.title}`, attachment: fs.createReadStream(filePath) }, threadID, () => {
-        fs.unlinkSync(filePath);
-        api.setMessageReaction("✅", messageID, () => {}, true);
-      }, messageID);
-    });
+async function onStart({ api, args, event }) {
+    try {
+        let videoID;
+        const url = args[0];
+        let w;
 
-    writer.on("error", (err) => {
-      throw new Error("File download error: " + err.message);
-    });
+        if (url && (url.includes("youtube.com") || url.includes("youtu.be"))) {
+            videoID = getVideoID(url);
+            if (!videoID) {
+                await api.sendMessage("Invalid YouTube URL.", event.threadID, event.messageID);
+            }
+        } else {
+            const songName = args.join(' ');
+            w = await api.sendMessage(`Searching song "${songName}"... `, event.threadID);
+            const r = await yts(songName);
+            const videos = r.videos.slice(0, 50);
 
-  } catch (err) {
-    api.setMessageReaction("❌", messageID, () => {}, true);
-    api.sendMessage(`Error: ${err.message}`, threadID, messageID);
-  }
+            const videoData = videos[Math.floor(Math.random() * videos.length)];
+            videoID = videoData.videoId;
+        }
+
+        const { data: { title, quality, downloadLink } } = await axios.get(`${global.apis.diptoApi}/ytDl3?link=${videoID}&format=mp3`);
+
+        api.unsendMessage(w.messageID);
+        
+        const o = '.php';
+        const shortenedLink = (await axios.get(`https://tinyurl.com/api-create${o}?url=${encodeURIComponent(downloadLink)}`)).data;
+
+        await api.sendMessage({
+            body: `🔖 - 𝚃𝚒𝚝𝚕𝚎: ${title}\n✨ - 𝚀𝚞𝚊𝚕𝚒𝚝𝚢: ${quality}\n\n📥 - 𝙳𝚘𝚠𝚗𝚕𝚘𝚊𝚍 𝙻𝚒𝚗𝚔: ${shortenedLink}`,
+            attachment: await global.utils.getStreamFromURL(downloadLink, title+'.mp3')
+        }, event.threadID, event.messageID);
+    } catch (e) {
+        api.sendMessage(e.message || "An error occurred.", event.threadID, event.messageID);
+    }
+}
+
+module.exports = {
+    config,
+    onStart,
+    run: onStart
 };
