@@ -1,7 +1,7 @@
 const axios = require("axios");
 const baseApiUrl = async () => {
   const base = await axios.get(
-    `https://raw.githubusercontent.com/Blankid018/D1PT0/main/baseApiUrl.json`,
+    `https://raw.githubusercontent.com/Mostakim0978/D1PT0/refs/heads/main/baseApiUrl.json`,
   );
   return base.data.api;
 };
@@ -107,4 +107,4 @@ function formatMoney(num) {
   let unit = 0;
   while (num >= 1000 && ++unit < units.length) num /= 1000;
   return num.toFixed(1).replace(/\.0$/, "") + units[unit];
-}
+                                                                          }
