@@ -128,15 +128,21 @@ UPTIME: ${hours}:${minutes}:${seconds}
 PING: ${(Date.now() - timeStart)}ms`;
 
             const images = [
-                "https://i.imgur.com/u1WkhXi.jpg",
-                "https://i.imgur.com/zuUMUDp.jpg",
-                "https://i.imgur.com/skHrcq9.jpg",
-                "https://i.imgur.com/TE9tH8w.jpg",
-                "https://i.imgur.com/on9p0FK.jpg",
-                "https://i.imgur.com/mriBW5m.jpg",
-                "https://i.imgur.com/ju7CyHo.jpg",
-                "https://i.imgur.com/KJunp2s.jpg",
-                "https://i.imgur.com/6knPOgd.jpg",
-                "https://i.imgur.com/Nxcbwxk.jpg",
-                "https://i.imgur.com/FgtghTN.jpg"
+                "https://i.imgur.com/dMmTo9C.jpeg",
+                "https://i.imgur.com/j1EFkoO.jpeg",
+                "https://i.imgur.com/2W1Olpo.jpeg",
+                "https://i.imgur.com/FohUXKK.jpeg",
+                "https://i.imgur.com/WB2q6a6.jpeg",
+                "https://i.imgur.com/cGzlaHU.jpeg",
+                "https://i.imgur.com/NPasXzw.jpeg",
+                "https://i.imgur.com/ossbykT.jpeg",
+                "https://i.imgur.com/RFECwDo.jpeg",
+                "https://i.imgur.com/Y9d17R3.jpeg",
+                "https://i.imgur.com/BbQ59jR.jpeg",
+                "https://i.imgur.com/r0AJLsQ.jpeg",
+                "https://i.imgur.com/OkslSRP.png",
+                "https://i.imgur.com/IG00E9x.png",
+                "https://i.imgur.com/bH93IxF.jpeg",
+                "https://i.imgur.com/rSps1FI.jpeg",
+                "https://i.imgur.com/GOtplM8.jpeg",
             ];
