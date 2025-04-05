@@ -2,7 +2,7 @@ module.exports = {
 	config: {
 		name: "uptime2",
 		aliases: ["up2"],
-      author: "yukinori",
+      author: "Fuck Your Mother ⚡",
 		role: 0,
 		shortDescription: {
 			en: "Show server uptime",
