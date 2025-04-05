@@ -1,6 +1,6 @@
 module.exports = {
   config: {
-    name: "botgc",
+    name: "supportgc",
     version: "1.0",
     author: "kivv",
     role: 0,
