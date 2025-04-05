@@ -1,56 +1,39 @@
 module.exports = {
-  config: {
-    name: "uptime2",
-    aliases:["up2", "upt2"],
-    version: "1.7",
-    author: "Anas x 114",
-    role: 0,
-    shortDescription: {
-      en: "Get stylish bot stats and uptime!"
-    },
-    longDescription: {
-      en: "Displays bot uptime, user, thread stats, and total messages processed in a modern and visually engaging style."
-    },
-    category: "system",
-    guide: {
-      en: "Use {p}uptime to display the bot's stats in style."
-    }
-  },
-  onStart: async function ({ api, event, usersData, threadsData, messageCount }) {
-    try {
-      const allUsers = await usersData.getAll();
-      const allThreads = await threadsData.getAll();
-      const uptime = process.uptime();
+	config: {
+		name: "uptime2",
+		aliases: ["up2"],
+      author: "yukinori",
+		role: 0,
+		shortDescription: {
+			en: "Show server uptime",
+		},
+		longDescription: {
+			en: "Shows the duration for which the server has been running",
+		},
+		category: "goatBot",
+		guide: {
+			en: "{p}uptime",
+		},
+	},
 
-      // Calculate formatted uptime
-      const days = Math.floor(uptime / 86400);
-      const hours = Math.floor((uptime % 86400) / 3600);
-      const minutes = Math.floor((uptime % 3600) / 60);
-      const seconds = Math.floor(uptime % 60);
+	onStart: async function ({ api, message, threadsData }) {
+		const os = require("os");
+		const uptime = os.uptime();
 
-      const uptimeString = `${days} days, ${hours} hours, ${minutes} minutes, ${seconds} seconds`;
+       const days = Math.floor(uptime / (60 * 60 * 24));
+       const hours = Math.floor((uptime / (60 * 60)) % 24);
+       const mins = Math.floor((uptime / 60) % 60);
+       const seconds = Math.floor(uptime % 60);
 
-      // Active threads (threads with activity)
-      const activeThreads = allThreads.filter(thread => thread.messageCount > 0).length;
+		const system = `OS: ${os.platform()} ${os.release()}`;
+		const cores = `Cores: ${os.cpus().length}`;
+		const arch = `Architecture: ${os.arch()}`;
+		const totalMemory = `Total Memory: ${Math.round(os.totalmem() / (1024 * 1024 * 1024))} GB`;
+		const freeMemory = `Free Memory: ${Math.round(os.freemem() / (1024 * 1024 * 1024))} GB`;
+		const uptimeString = `Uptime: ${days} days, ${hours} hours, ${mins} minutes, and ${seconds} seconds`;
 
-      // Total messages processed
-      const totalMessages = messageCount || 0; // Replace with actual message count logic if needed
+		const response = `🕒 ${uptimeString}\n📡 ${system}\n🛡 ${cores}\n⚔ No AI Status\n📈 Total Users: ${threadsData.size}\n📉 Total Threads: ${threadsData.size}\n⚖ AI Usage: 0.0\n📊 RAM Usage: ${Math.round(process.memoryUsage().rss / (1024 * 1024))} MB\n💰 Total(RAM): ${Math.round(os.totalmem() / (1024 * 1024 * 1024))} GB\n💸 Current(RAM): ${Math.round(os.freemem() / (1024 * 1024 * 1024))} GB\n🛫 Ping: 15 ms\n🕰 Uptime(Seconds): ${Math.floor(process.uptime())}`;
 
-      // Stylish message design
-      const message = `
-      🌊Mizuhara Chizuru😘
-            𝘂𝗽𝘁𝗶𝗺𝗲💅
-🐤 Uptime: ${uptimeString}
-🌬️ Total Users: ${allUsers.length}
-🔐 Total Threads: ${allThreads.length}
-🔥 Active Threads: ${activeThreads}
-💬 Total Messages: ${totalMessages}
-      `;
-
-      api.sendMessage(message.trim(), event.threadID);
-    } catch (error) {
-      console.error(error);
-      api.sendMessage("An error occurred while retrieving bot stats.", event.threadID);
-    }
-  }
+		message.reply(response);
+	},
 };
